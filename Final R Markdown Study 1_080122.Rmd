@@ -1,0 +1,564 @@
+---
+title: "Study 1"
+author: "Evan Valdes"
+date: "7/17/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r}
+## Set working directory----
+setwd("/Users/Evanvaldes1/Desktop/MASSEY/STUDY 1")
+```
+
+```{r}
+library(dplyr)
+library(surveydata)
+library(Hmisc)
+library(ggplot2)
+library(psych)
+library(haven)
+library(stats)
+library(lavaan)
+library(semPlot)
+library(semTools)
+library(PerformanceAnalytics)
+library(ggiraphExtra)
+library(equaltestMI)
+library(stargazer)
+library(sjPlot)
+library(apaTables)
+library(jtools)
+library(pwr)
+library(effsize)
+library(nlme)
+library(interplot)
+library(ggthemes)
+library(cowplot)
+library(officer)
+library(tidyverse)
+library(ltm)
+library(mice)
+library(styler)
+library(BaylorEdPsych)
+library(mitools)
+```
+
+```{r}
+## Load data----
+D1_CHINA_AND_USA <- read_sav("D1 CHINA AND USA.sav")
+```
+
+## A PRIORI POWER ANALYSIS 
+```{r}
+
+r_power_CHINA <- pwr.f2.test(u = 5, v = NULL, f2 = 0.02, sig.level = .05, power = .8)
+
+r_power_CHINA
+
+r_power_USA <- pwr.f2.test(u = 5, v = NULL, f2 = 0.02, sig.level = .05, power = .8)
+
+r_power_USA
+
+```
+
+```{r}
+## Changing class of variables to numeric ----
+#MW: This is totally fine but there can be more efficient ways to make changes to many variables at once. A couple of tricks:
+#grep allows you to pull out matching patterns.
+#sapply allows you to apply a function (e.g., as_numeric) to multiple vectors all at once
+
+#Eg. the two lines below convert all the items starting wiht "SJ" to numeric. 
+SJ_vars = grep("SJ", names(D1_CHINA_AND_USA), value = TRUE)
+D1_CHINA_AND_USA[,SJ_vars] = sapply(D1_CHINA_AND_USA[,SJ_vars], as.numeric)
+
+
+D1_CHINA_AND_USA$SJ <- as.numeric(D1_CHINA_AND_USA$SJ)
+D1_CHINA_AND_USA$SJ1 <- as.numeric(D1_CHINA_AND_USA$SJ1)
+D1_CHINA_AND_USA$SJ2 <- as.numeric(D1_CHINA_AND_USA$SJ2)
+D1_CHINA_AND_USA$SJ3 <- as.numeric(D1_CHINA_AND_USA$SJ3) 
+D1_CHINA_AND_USA$SJ4 <- as.numeric(D1_CHINA_AND_USA$SJ4)
+D1_CHINA_AND_USA$SJ_W2 <- as.numeric(D1_CHINA_AND_USA$SJ_W2)
+D1_CHINA_AND_USA$SJ1_W2 <- as.numeric(D1_CHINA_AND_USA$SJ1_W2)
+D1_CHINA_AND_USA$SJ2_W2 <- as.numeric(D1_CHINA_AND_USA$SJ2_W2)
+D1_CHINA_AND_USA$SJ3_W2 <- as.numeric(D1_CHINA_AND_USA$SJ3_W2)
+D1_CHINA_AND_USA$SJ4_W2 <- as.numeric(D1_CHINA_AND_USA$SJ4_W2)
+D1_CHINA_AND_USA$AmericaThreat <- as.numeric(D1_CHINA_AND_USA$AmericaThreat)
+D1_CHINA_AND_USA$Social_Status <- as.numeric(D1_CHINA_AND_USA$Social_Status)
+D1_CHINA_AND_USA$Social_Status_W2 <- as.numeric(D1_CHINA_AND_USA$Social_Status_W2)
+D1_CHINA_AND_USA$Trust_USA <- as.numeric(D1_CHINA_AND_USA$Trust_USA)
+D1_CHINA_AND_USA$Trust_USA_W2 <- as.numeric(D1_CHINA_AND_USA$Trust_USA_W2)
+D1_CHINA_AND_USA$Trust_Russia_W2 <- as.numeric(D1_CHINA_AND_USA$Trust_Russia_W2)
+D1_CHINA_AND_USA$Eduaction_L1 <- as.numeric(D1_CHINA_AND_USA$Eduaction_L1)
+D1_CHINA_AND_USA$Trust_LocGvt <- as.numeric(D1_CHINA_AND_USA$Trust_LocGvt)
+D1_CHINA_AND_USA$Trust_LocGvt_W2 <- as.numeric(D1_CHINA_AND_USA$Trust_LocGvt_W2)
+D1_CHINA_AND_USA$TrustGen <- as.numeric(D1_CHINA_AND_USA$TrustGen)
+D1_CHINA_AND_USA$House_Income <- as.numeric(D1_CHINA_AND_USA$House_Income)
+D1_CHINA_AND_USA$House_Income_2 <- as.numeric(D1_CHINA_AND_USA$House_Income_2)
+D1_CHINA_AND_USA$Trust_China_W2 <- as.numeric(D1_CHINA_AND_USA$Trust_China_W2)
+D1_CHINA_AND_USA$Trust_NatGvt <- as.numeric(D1_CHINA_AND_USA$Trust_NatGvt)
+D1_CHINA_AND_USA$Trust_NatGvt_W2 <- as.numeric(D1_CHINA_AND_USA$Trust_NatGvt_W2)
+D1_CHINA_AND_USA$Trust_Judiciary <- as.numeric(D1_CHINA_AND_USA$Trust_Judiciary)
+D1_CHINA_AND_USA$Trust_Judiciary_W2 <- as.numeric(D1_CHINA_AND_USA$Trust_Judiciary_W2)
+D1_CHINA_AND_USA$LibCon_Economic <- as.numeric(D1_CHINA_AND_USA$LibCon_Economic)
+D1_CHINA_AND_USA$LibCon_Economic_W2 <- as.numeric(D1_CHINA_AND_USA$LibCon_Economic_W2)
+D1_CHINA_AND_USA$LibCon_Political <- as.numeric(D1_CHINA_AND_USA$LibCon_Political)
+D1_CHINA_AND_USA$LibCon_Political_W2 <- as.numeric(D1_CHINA_AND_USA$LibCon_Political_W2)
+D1_CHINA_AND_USA$LibCon_Social <- as.numeric(D1_CHINA_AND_USA$LibCon_Social)
+D1_CHINA_AND_USA$LibCon_Social_W2 <- as.numeric(D1_CHINA_AND_USA$LibCon_Social_W2)
+D1_CHINA_AND_USA$Age <- as.numeric(D1_CHINA_AND_USA$Age)
+D1_CHINA_AND_USA$Age_W2 <- as.numeric(D1_CHINA_AND_USA$Age_W2)
+D1_CHINA_AND_USA$Gender <- as.numeric(D1_CHINA_AND_USA$Gender)
+D1_CHINA_AND_USA$RWA <- as.numeric(D1_CHINA_AND_USA$RWA)
+D1_CHINA_AND_USA$Country <- as.numeric(D1_CHINA_AND_USA$Country)
+
+```
+
+## Centering variables for regression analyses
+```{r}
+mean(D1_CHINA_AND_USA$SJ,na.rm = T )
+mean(D1_CHINA_AND_USA$SJ_W2, na.rm = T)
+mean(D1_CHINA_AND_USA$Eduaction_L1, na.rm = T)
+mean(D1_CHINA_AND_USA$Social_Status, na.rm = T)
+mean(D1_CHINA_AND_USA$Age, na.rm = T)
+
+
+D1_CHINA_AND_USA$SJ <- (D1_CHINA_AND_USA$SJ - 3.796506)
+D1_CHINA_AND_USA$SJ_W2 <- (D1_CHINA_AND_USA$SJ_W2 - 3.87419)
+D1_CHINA_AND_USA$Eduaction_L1 <- (D1_CHINA_AND_USA$Eduaction_L1 - 3.951973)
+D1_CHINA_AND_USA$Social_Status <- (D1_CHINA_AND_USA$Social_Status - 5.267965)
+D1_CHINA_AND_USA$Age <- (D1_CHINA_AND_USA$Age - 44.5947)
+```
+
+## Recoding Country values - china = 0 USA = 1
+```{r}
+## Changing Country names ----
+D1_CHINA_AND_USA$Country2 <- NA
+
+D1_CHINA_AND_USA$Country2[D1_CHINA_AND_USA$Country == "4"] <- "0"
+D1_CHINA_AND_USA$Country2[D1_CHINA_AND_USA$Country == "22"] <- "1"
+
+D1_CHINA_AND_USA$Country2 <- as.numeric(D1_CHINA_AND_USA$Country2)
+
+D1_CHINA_AND_USA$Country2 <- gsub("0", "China", D1_CHINA_AND_USA$Country2)
+D1_CHINA_AND_USA$Country2 <- gsub("1", "USA", D1_CHINA_AND_USA$Country2)
+
+```
+
+
+
+```{R}
+## Making Country a factor
+D1_CHINA_AND_USA$Country2 <- as.factor(D1_CHINA_AND_USA$Country2)
+
+## Dragging participant age from wave 1
+
+D1_CHINA_AND_USA <- D1_CHINA_AND_USA %>% mutate(
+  Age_W2 = 
+    dplyr::coalesce(
+      Age
+    )
+)
+```
+
+## Transforming income variable to 0 - 100% 
+```{r}
+D1_CHINA_AND_USA$income_percent = NA
+
+
+D1_CHINA_AND_USA$income_percent <- rank(D1_CHINA_AND_USA$House_Income)/length(D1_CHINA_AND_USA$House_Income)*100
+```
+
+```{r}
+Incomedata <- subset(D1_CHINA_AND_USA, select = c(
+  "Country2", "House_Income", "income_percent",
+  "Eduaction_L1", "SJ", "SJ_W2",
+  "Social_Status", "Age", "Age_W2", "Gender",
+  "SJ1", "SJ2", "SJ3", "SJ4", "RWA", "LibCon_Economic",
+  "LibCon_Political", "LibCon_Social"
+))
+```
+
+## Missing data analysis
+```{r}
+colSums(is.na(Incomedata))
+```
+
+## Calculating percentage of missing data for analyses
+```{r}
+totalcells <- prod(dim(Incomedata))
+missingcells <- sum(is.na(Incomedata))
+percentage <- (missingcells *100)/(totalcells)
+
+percentage
+```
+
+## Multiple imputation of NA values using mice package
+```{r}
+md.pattern(Incomedata)
+```
+
+## linear regression using bootstrap from mice package for multiple imputation
+## Number of imputations (m = 40) using White et al. (2011) practical rule 
+## of thumb that m should be at least equal to % of incomplete cases
+```{r}
+## Impute data function
+imputed_data <- mice(Incomedata, m=40, method = "norm.boot", seed = 100)
+summary(imputed_data)
+
+options(scipen = 999)
+
+## pooling imputed data to fit model waves 1 and 2
+fit1 <- with(data = imputed_data, exp = lm(SJ ~ Age + Gender + Country2 + Eduaction_L1 + income_percent
+                      + Social_Status + Age*Country2 + Gender*Country2 +
+                        Eduaction_L1*Country2 + income_percent*Country2 + 
+                        Social_Status*Country2))
+
+fit2 <- with(data = imputed_data, exp = lm(SJ_W2 ~ Age + Gender + Country2 + Eduaction_L1 + income_percent
+                     + Social_Status + SJ + Age*Country2
+                     + Gender*Country2 + Eduaction_L1*Country2 + 
+                       income_percent*Country2 + Social_Status*Country2 + 
+                        SJ*Country2))
+
+## Single SJ item analysis used by Li et al.
+fit3 <- with(data = imputed_data, exp = lm(SJ1 ~ Age + Gender + Country2 + Eduaction_L1 + income_percent +
+  Social_Status + Age * Country2 + Gender * Country2 + Eduaction_L1 * Country2 +
+  income_percent * Country2 + Social_Status * Country2))
+
+summary(pool(fit1))
+pool.r.squared(fit1)
+
+summary(pool(fit2))
+pool.r.squared(fit2)
+
+summary(pool(fit3))
+pool.r.squared(fit3)
+
+
+## Reviewer 2 requested analysis (Comment 4)
+fit4 <- with(data = imputed_data, exp = lm(SJ ~ income_percent + Eduaction_L1 + Social_Status + income_percent*Social_Status + Eduaction_L1*Social_Status))
+
+summary(pool(fit4))
+pool.r.squared(fit4)
+```
+
+## Comparing pooled results of MI
+```{r}
+stacked_imputed_data <- complete(imputed_data, "long", include = T)
+finished_imputed_data <- complete(imputed_data, 4)
+
+```
+
+## Cronbachs Alpha using ltm package
+```{r}
+
+data <- subset(finished_imputed_data, select = c(SJ1, SJ2, SJ3, SJ4))
+cronbach.alpha(data,
+  standardized = F, CI = F, probs = c(0.025, 0.975), B = 1000,
+  na.rm = T
+)
+
+```
+
+
+## Testing Measurement invariance 
+```{r}
+
+## Simple CFA of SJ loading onto its 4 variables Wave 1
+
+SJSESCFA <- 'SYSJ =~ SJ1 + SJ2 + SJ3 + SJ4
+OSES =~ income_percent + Eduaction_L1
+SSES =~ Social_Status'
+
+# configural invariance (does the model seem to fit the data reasonably well in both countries?)
+fit1 <- cfa.mi(SJSESCFA, data = imputed_data, group = "Country2")
+
+summary(fit1, standardized = TRUE, rsquare = TRUE, fit.measures = TRUE)
+
+
+# weak invariance/metric invariance (are the relationships between the latent variable SJ and the items about the same in both countries? This is probably the main thing that matters for us)
+
+fit2 <- cfa.mi(SJSESCFA, data = imputed_data, group = "Country2",
+
+            group.equal = "loadings")
+summary(fit2, standardized = TRUE, rsquare = TRUE, fit.measures = TRUE)
+
+ 
+
+# strong invariance (are the intercepts the same in both countries? This would need to hold to compare mean differences across countries, probably less important for us)
+
+fit3 <- cfa.mi(SJSESCFA, data = imputed_data, group = "Country2",
+
+            group.equal = c("intercepts", "loadings"))
+summary(fit3, standardized = TRUE, rsquare = TRUE, fit.measures = TRUE)
+
+ 
+
+# model comparison tests (comparison to fit1 to fit2 is the main thing that establishes weak invariance).
+
+lavTestLRT.mi(fit1, test = "D2", pool.robust = T)
+lavTestLRT.mi(fit2, test = "D2", pool.robust = T)
+lavTestLRT.mi(fit3, test = "D2", pool.robust = T)
+```
+
+## Path Diagram for simple CFA
+
+
+## Correlation analysis per country - subset each country
+## Creating subset for China and USA
+```{r}
+smallchina <- filter(finished_imputed_data, Country2 == "China")
+
+smallusa <- filter(finished_imputed_data, Country2 == "USA")
+```
+
+## China Correlation
+```{r}
+chinasubset <- subset(smallchina, select = c(SJ, SJ_W2, Social_Status, Eduaction_L1, income_percent, Age, Gender))
+
+chart.Correlation(chinasubset, histogram = TRUE, pch = 19)
+
+apa.cor.table(chinasubset, filename = "chinacortable1.doc", table.number = 1)
+
+```
+
+## USA Correlation
+```{r}
+usasubset <- subset(smallusa, select = c(
+  SJ, SJ_W2, Social_Status, Eduaction_L1, income_percent, Age, Gender
+))
+
+chart.Correlation(usasubset, histogram = TRUE, pch = 19)
+
+apa.cor.table(usasubset, filename = "usacortable1.doc", table.number = 2)
+
+```
+
+
+## Centering variables for regression analyses
+```{r}
+mean(finished_imputed_data$SJ)
+mean(finished_imputed_data$SJ_W2)
+mean(finished_imputed_data$Eduaction_L1)
+mean(finished_imputed_data$Social_Status)
+mean(finished_imputed_data$Age)
+
+
+finished_imputed_data$SJ <- (finished_imputed_data$SJ - 3.796852)
+finished_imputed_data$SJ_W2 <- (finished_imputed_data$SJ_W2 - 3.84396)
+finished_imputed_data$Eduaction_L1 <- (finished_imputed_data$Eduaction_L1 - 3.831144)
+finished_imputed_data$Social_Status <- (finished_imputed_data$Social_Status - 5.271802)
+finished_imputed_data$Age <- (finished_imputed_data$Age - 44.67253)
+```
+
+```{r}
+
+# regression model with the full sample with interaction terms 
+
+fullregression <- lm(SJ_W2 ~ Age + Gender + Country2 + Eduaction_L1 + income_percent
+                     + Social_Status + SJ + Age*Country2
+                     + Gender*Country2 + Eduaction_L1*Country2 + 
+                       income_percent*Country2 + Social_Status*Country2 + 
+                        SJ*Country2,
+                     data = finished_imputed_data
+                       )
+
+summary(fullregression)
+anova(fullregression)
+
+```
+
+## Interaction plots for wave 2
+
+## Interaction of education
+
+```{r}
+ p1 <- interplot(m = fullregression, var1 = "Eduaction_L1", var2 = "Country2") +
+  xlab("Country, 0 = China, 1 = USA") + ylab("Estimated Interaction of Objective SES (Education)") + geom_hline(yintercept = 0, linetype = "dashed") + 
+  theme_apa(x.font.size = 7, y.font.size = 7)
+
+```
+## Interaction of income
+```{r}
+p2 <- interplot(m = fullregression, var1 = "income_percent", var2 = "Country2") +
+  xlab("Country, 0 = China, 1 = USA") + ylab("Estimated Interaction of Objective SES (Income)") + geom_hline(yintercept = 0, linetype = "dashed") + 
+  theme_apa(x.font.size = 7, y.font.size = 7)
+
+```
+## Interaction of Social Status
+```{r}
+  p3 <- interplot(m = fullregression, var1 = "Social_Status", var2 = "Country2") +
+  xlab("Country, 0 = China, 1 = USA") + ylab("Estimated interaction of Subjective SES (Wave 1)") +
+  geom_hline(yintercept = 0, linetype = "dashed") + 
+  theme_apa(x.font.size = 7, y.font.size = 7)
+
+```
+
+
+## Creating plot grid of wave two effect
+```{r}
+title <- ggdraw() +
+  draw_label("Conditional Coefficient of Subjective and Objective SES on SJ by Country", fontface = "bold", x = 0, hjust = 0)
+plot_row <- plot_grid(p1, p2, p3)
+wave_2_effect_plot <- plot_grid(title, plot_row, ncol = 1, rel_heights = c(0.1, 1))
+ggsave("wave2_image.png", wave_2_effect_plot)
+```
+## converting plots to word doc format wave 2
+```{r}
+wave2_effect_plot_doc <- read_docx()
+wave2_effect_plot_doc <- body_add_img(wave2_effect_plot_doc, src = "wave2_image.png", width = 7, height = 7)
+print(wave2_effect_plot_doc, target = "wave2_effect_plot_doc.docx")
+```
+
+```{r}
+## Wave 1 regression model with full sample and interaction termS
+
+
+fullregression2 <- lm(SJ ~ Age + Gender + Country2 + Eduaction_L1 + income_percent
+                      + Social_Status + Age*Country2 + Gender*Country2 +
+                        Eduaction_L1*Country2 + income_percent*Country2 + 
+                        Social_Status*Country2, data = finished_imputed_data)
+
+summary(fullregression2)
+anova(fullregression2)
+
+```
+
+## Interaction plots for wave 1
+
+## Interaction plot for Education
+```{r}
+p4 <- interplot(m = fullregression2, var1 = "Eduaction_L1", var2 = "Country2") + 
+  xlab("Country, 0 = China, 1 = USA") + ylab("Estimated interaction of Objective SES (Education)") +
+  geom_hline(yintercept = 0, linetype = "dashed") + theme_apa(x.font.size = 7, y.font.size = 7)
+
+```
+
+```{r}
+p5 <- interplot(m = fullregression2, var1 = "income_percent", var2 = "Country2") + 
+  xlab("Country, 0 = China, 1 = USA") + ylab("Estimated interaction of Objective SES (Income)") + 
+  geom_hline(yintercept = 0, linetype = "dashed") + theme_apa(x.font.size = 7, y.font.size = 7)
+```
+
+```{r}
+p6 <- interplot(m = fullregression2, var1 = "Social_Status", var2 = "Country2") +
+  xlab("Country, 0 = China, 1 = USA") + ylab("Estimated interaction of Subjective SES (Wave 1)") +
+  geom_hline(yintercept = 0, linetype = "dashed") + 
+  theme_apa(x.font.size = 7, y.font.size = 7)
+```
+
+## Creating multiple plots in one
+```{r}
+title1 <- ggdraw() + 
+draw_label("Conditional Coefficient of Subjective and Objective SES on SJ by Country", fontface = 'bold', x = 0, hjust = 0) 
+plot_row <- plot_grid(p4, p5, p6)
+wave_1_effect_plot <- plot_grid(title1, plot_row, ncol = 1, rel_heights = c(0.1, 1))
+ggsave("wave1_image.png", wave_1_effect_plot)
+```
+## converting plots to word doc format wave 1
+```{r}
+wave1_effect_plot_doc <- read_docx()
+wave1_effect_plot_doc <- body_add_img(wave1_effect_plot_doc, src = "wave1_image.png", width = 7, height = 7)
+print(wave1_effect_plot_doc, target = "wave1_effect_plot_doc.docx")
+```
+
+## LM tables for paper - China Vs USA - WAVE 1 and 2
+```{r}
+
+stargazer(fullregression2, fullregression, no.space = T, dep.var.labels = c("System Justification Wave 1", "System Justification Wave 2"), ci = T, ci.level = 0.95,  type = "html", digits = 2, out = "Wave_1&2_LM.doc")
+```
+
+```{r}
+## Creating a descriptives table 1----
+## Only run after running correlation tables
+## and regressions or you will get an error 
+## when trying to run. Skip if you are changing 
+## gender names below
+#MW: This seems to go fine with the code run in the order it's presented.
+library(table1)
+finished_imputed_data$Gender <- factor(finished_imputed_data$Gender, levels = c(1, 0),
+                                  labels = c("Male",
+                                             "Female"))
+label(finished_imputed_data$Age) <- "Age"
+label(finished_imputed_data$Gender) <- "Gender"
+
+
+table1::table1(~Age + Gender | Country2, data = finished_imputed_data)
+```
+
+## SENSITIVITY POWER ANALYSIS
+```{r}
+smallchina <- filter(Incomedata, Country2 == "China")
+smallusa <- filter(Incomedata, Country2 == "USA")
+colSums(is.na(smallchina))
+colSums(is.na(smallusa))
+
+r_power_CHINA <- pwr.f2.test(u = 5, v = NULL, f2 = 0.02, sig.level = .05, power = .8)
+
+r_power_CHINA
+
+r_power_USA <- pwr.f2.test(u = 5, v = NULL, f2 = 0.02, sig.level = .05, power = .8)
+
+r_power_USA
+```
+
+## Using single SJ item as Li et al
+## running on cross-sectional data
+```{r}
+regression2 <- lm(SJ1 ~ Age + Gender + Country2 + Eduaction_L1 + income_percent +
+                    Social_Status + Age*Country2 + Gender*Country2 + Eduaction_L1*Country2 +
+                    income_percent*Country2 + Social_Status*Country2, data = finished_imputed_data)
+
+summary(regression2)
+anova(regression2)
+```
+
+
+```{r}
+interplot(m = regression2, var1 = "Social_Status", var2 = "Country2") +
+        xlab("Country, 0 = China, 1 = USA") + ylab("Estimated interaction of Subjective SES") +
+        geom_hline(yintercept = 0, linetype = "dashed") + 
+        theme_apa(x.font.size = 7, y.font.size = 7)
+
+interplot(m = regression2, var1 = "income_percent", var2 = "Country2") +
+  xlab("Country, 0 = China, 1 = USA") + ylab("Estimated interaction of Objective SES (income)") +
+  geom_hline(yintercept = 0, linetype = "dashed") + 
+  theme_apa(x.font.size = 7, y.font.size = 7)
+
+interplot(m = regression2, var1 = "Eduaction_L1", var2 = "Country2") +
+  xlab("Country, 0 = China, 1 = USA") + ylab("Estimated interaction of Objective SES (education)") +
+  geom_hline(yintercept = 0, linetype = "dashed") + 
+  theme_apa(x.font.size = 7, y.font.size = 7)
+```
+
+## Added analyses
+
+## Descriptive stats of variables of interest
+## Adding Median and Range to correlation tables
+```{r}
+summarystat <- subset(finished_imputed_data, select = c("Country2","SJ", "SJ_W2" ,"Gender", "Age", "Eduaction_L1", "income_percent", "Social_Status"))
+
+describeBy(summarystat, group = summarystat$Country2)
+```
+
+## Reviewer 2 requested analysis surrounding interaction between
+## Objective SES and subjective SES in predicting SJ (Comment 4)
+```{r}
+regression3 <- lm(SJ ~ Eduaction_L1 + income_percent + Social_Status + Country2
+                  + Eduaction_L1*Social_Status + income_percent*Social_Status +
+                          Country2*Social_Status, data = finished_imputed_data)
+
+summary(regression3)
+anova(regression3)
+```
+
+## Exploring Region data per country
+## Urban vs. Rural living
+```{r}
+library(tableone)
+vars_for_table <- c("Country", "Urban_Rural")
+
+CreateTableOne(vars = vars_for_table, data = D1_CHINA_AND_USA, strata = "Country")
+
+```
